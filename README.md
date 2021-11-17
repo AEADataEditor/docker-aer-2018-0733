@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Many R replication packages have dependencies, which sometimes include the specific version of R (in particular before/after release of v4).
-This Docker image is meant to isolate and stabilize that environment, and should be portable across
-multiple operating system, as long as [Docker](https://docker.com) is available.
+Used for reproducibility check of [AER-2018-0733](https://doi.org/10.1257/aer.20180733):
+
+> Brunnermeier, Markus, Darius Palia, Karthik A. Sastry, and Christopher A. Sims. 2021. "Feedbacks: Financial Markets and Economic Activity." American Economic Review, 111 (6): 1845-79. DOI: [10.1257/aer.20180733](https://doi.org/10.1257/aer.20180733)
 
 ## Build
 
@@ -12,58 +12,34 @@ multiple operating system, as long as [Docker](https://docker.com) is available.
 
 See the [setup.R](setup.R) file, and update accordingly.
 
-> WARNING: not all packages might build, depending on whether the R base image has the relevant libraries. You might want to change R base image, or switch to another image from [rocker](https://hub.docker.com/u/rocker).
 
 ### Setup info
 
 Set the `TAG` and `IMAGEID` accordingly.
 
 ```
-TAG=v$(date +%F)
-MYIMG=aer-9999-8888
+TAG=20201025
+MYIMG=aer-2018-0733
 MYHUBID=aeadataeditor
 ```
 ### Build the image
 
 ```
-docker build  . -t $MYIMG:$TAG
-```
-or if using the newer build system 
-```
-DOCKER_BUILDKIT=1 docker build . -t $MYIMG:$TAG
+DOCKER_BUILDKIT=1 docker build . -t $MYHUBID/$MYIMG:$TAG
 ```
 
 ## Publish the image
 
-The resulting docker image can be uploaded to [Docker Hub](https://hub.docker.com/), if desired.
-
-```
-docker push $MYHUBID/${MYIMG}:$TAG
-```
+The resulting docker image can be found at [https://hub.docker.com/r/aeadataeditor/aer-2018-0733/tags](https://hub.docker.com/r/aeadataeditor/aer-2018-0733/tags).
 
 ## Using the image
 
-If using a pre-built image on [Docker Hub](https://hub.docker.com/repository/docker/larsvilhuber/):
+- Downloaded replication code (now published at [https://doi.org/10.3886/E121521V1](https://doi.org/10.3886/E121521V1))
+- Created [main.R](main.R) to run the figure/table creation code.
+- Ran `time docker run -it --rm -v $(pwd):/code -w /code $MYHUBID/$MYIMG:$TAG Rscript --vanilla main.R > main.Rlog`
+- Created [redo.R](redo.R) to hold the two "additional" scripts
+- Ran `time docker run -it --rm -v $(pwd):/code -w /code $MYHUBID/$MYIMG:$TAG Rscript --vanilla redo.R > redo.Rlog` 
 
-```
-docker run -it --rm $MYHUBID/${MYIMG}:$TAG
-```
+## Note
 
-If using the image you just created:
-
-```
-docker run -it --rm $MYHUBID/${MYIMG}:$TAG
-```
-
-Somewhat more sophisticated, if you are in a project directory (for instance, the replication package you just downloaded), you can access it directly within the image as follows:
-
-```
-docker run -it --rm -v $(pwd)/subdir:/code -w /code $MYHUBID/${MYIMG}:$TAG
-```
-
-
-You can now start to run code.
-
-## NOTE
-
-This entire process could be automated, using [Travis-CI](https://docs.travis-ci.com/user/docker/#pushing-a-docker-image-to-a-registry) or [Github Actions](https://github.com/marketplace/actions/build-and-push-docker-images). Not done yet.
+This repo was not created at the time, but was subsequently reconstructed from internal (private) git repositories.
